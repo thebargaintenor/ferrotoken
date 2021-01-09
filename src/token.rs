@@ -72,11 +72,11 @@ fn scale_to_fill_viewport(viewport: Rect, img: &mut RgbaImage) -> RgbaImage {
     let viewport_aspect = viewport.width as f64 / viewport.height as f64;
 
     if viewport_aspect >= img_aspect {
-        let scale_factor = img_width / viewport.width as f64;
+        let scale_factor = viewport.width as f64 / img_width;
         let scaled_height: u32 = (img_width / img_aspect * scale_factor).ceil() as u32;
         imageops::resize(img, viewport.width, scaled_height, imageops::FilterType::CatmullRom)
     } else {
-        let scale_factor = img_height / viewport.height as f64;
+        let scale_factor = viewport.height as f64 / img_height;
         let scaled_width: u32 = (img_height * img_aspect * scale_factor).ceil() as u32;
         imageops::resize(img, scaled_width, viewport.height, imageops::FilterType::CatmullRom)
     }
@@ -102,13 +102,11 @@ fn merge_images(mask: TransparencyMask, template: &RgbaImage, mut content: &mut 
 
     for x in 0..mask.bounds.width {
         for y in 0..mask.bounds.height {
+            let tx = x + mask.bounds.x;
+            let ty = y + mask.bounds.y;
             // Array2D uses (row, column) for retrieval
-            if mask.filter[(y as usize, x as usize)] {
-                token.put_pixel(
-                    x + mask.bounds.x,
-                    y + mask.bounds.y,
-                    cropped.get_pixel(x, y).clone(),
-                )
+            if mask.filter[(ty as usize, tx as usize)] {
+                token.put_pixel(tx, ty, cropped.get_pixel(x, y).clone());
             }
         }
     }
