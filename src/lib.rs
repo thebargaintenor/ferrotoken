@@ -1,2 +1,2 @@
-mod color;
-mod token;
+pub mod color;
+pub mod token;
